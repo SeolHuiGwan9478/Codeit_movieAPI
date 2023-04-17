@@ -20,7 +20,7 @@ class ActorSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'gender', 'birth_date']
     
 class ReviewSerializer(serializers.ModelSerializer):
-    movie = MovieSerializer(read_only=True)
+    movie = MovieSerializer(many=True, read_only=True)
     class Meta:
         model = Review
         fields = ['id', 'movie', 'username', 'star', 'comment', 'created']

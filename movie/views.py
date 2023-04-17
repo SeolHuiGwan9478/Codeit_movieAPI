@@ -1,74 +1,85 @@
 from django.shortcuts import render
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.generics import get_object_or_404
+from rest_framework.views import APIView
+from rest_framework.decorators import api_view
 from rest_framework import status
 
 from .serializers import MovieSerializer, ActorSerializer, ReviewSerializer
 from .models import Movie, Actor, Review
 # Create your views here.
 
-@api_view(['GET', 'POST'])
-def movie_list(request):
-    if request.method == 'GET': 
+class MovieList(APIView):
+    def get(self, request):
         movies = Movie.objects.all()
         serializer = MovieSerializer(movies, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'POST':
+    
+    def post(self, request):
         data = request.data
         serializer = MovieSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         
-@api_view(['GET', 'PATCH', 'DELETE'])
-def movie_detail(request, pk):
-    movie = get_object_or_404(Movie, pk=pk)
-    if request.method == 'GET':
+class MovieDetail(APIView):
+    def get_object(self, pk):
+        movie = get_object_or_404(Movie, pk=pk)
+        return movie
+
+    def get(self, request, pk):
+        movie = self.get_object(pk)
         serializer = MovieSerializer(movie)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'PATCH':
+    
+    def patch(self, request):
         data = request.data
-        serializer = MovieSerializer(instance=movie, data=data, partial=True)
+        serializer = MovieSerializer(data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'DELETE':
+
+    def delete(self, request, pk):
+        movie = self.get_object(pk)
         movie.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
-@api_view(['GET', 'POST'])
-def actor_list(request):
-    if request.method == 'GET':
+class ActorList(APIView):
+    def get(self, request):
         actors = Actor.objects.all()
         serializer = ActorSerializer(actors, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'POST':
+    
+    def post(self, request):
         data = request.data
         serializer = ActorSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET', 'PATCH', 'DELETE'])
-def actor_detail(request, pk):
-    actor = get_object_or_404(Actor, pk=pk)
-    if request.method == 'GET':
+class ActorDetail(APIView):
+    def get_object(self, pk):
+        actor = get_object_or_404(Actor, pk=pk)
+        return actor
+
+    def get(self, request, pk):
+        actor = self.get_object(pk)
         serializer = ActorSerializer(actor)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    elif request.method == 'PATCH':
+    
+    def patch(self, request):
         data = request.data
-        serializer = ActorSerializer(instance=actor, data=data, partial=True)
+        serializer = ActorSerializer(data=data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'DELETE':
+    
+    def delete(self, request, pk):
+        actor = self.get_object(pk)
         actor.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
     
